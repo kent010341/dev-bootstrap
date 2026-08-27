@@ -1,0 +1,8 @@
+#!/bin/bash
+git config --global alias.back 'checkout -'
+git config --global alias.copy '!f(){ git checkout $1 -- $2; }; f'
+git config --global alias.listalias '!git config --get-regexp ^alias\.'
+git config --global alias.fp '!f() { git fetch --prune; }; f'
+git config --global alias.pp 'pull --prune'
+git config --global alias.discard '!git reset --hard && git clean -fd'
+git config --global alias.unstage 'restore --staged'
