@@ -1,0 +1,26 @@
+{
+  "name": "cli-utils",
+  "version": "1.0.0",
+  "description": "Personal CLI toolbelt (git helpers, process/port utilities, uuid, nc) rewritten as cross-platform Node.js ESM scripts.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "gfmp": "./bin/gfmp.mjs",
+    "killp": "./bin/killp.mjs",
+    "port-usage": "./bin/port-usage.mjs",
+    "uuid": "./bin/uuid.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md"
+  ],
+  "dependencies": {
+    "clipboardy": "^4.0.0",
+    "find-process": "^1.4.7",
+    "uuid": "^14.0.1"
+  }
+}
