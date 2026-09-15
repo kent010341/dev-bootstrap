@@ -19,3 +19,7 @@ Set-PSReadLineKeyHandler -Key "Ctrl+k" -Function ClearScreen
 
 # add open alias for the native Windows explorer.exe command.
 Set-Alias open explorer.exe -Force
+
+# fix CJK encoding
+chcp 65001 > $null
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
