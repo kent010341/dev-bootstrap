@@ -69,3 +69,11 @@ Options:
 - `-u, --upper` — Use uppercase hexadecimal letters
 - `-n, --no-dash` — Remove hyphens from the UUID
 - `-p, --print-only` — Print the UUID without copying it to the clipboard
+
+### `checkout`
+
+Interactively select and switch to a local or remote Git branch. Fetch remote branches directly from the selector when needed.
+
+```text
+checkout
+```
