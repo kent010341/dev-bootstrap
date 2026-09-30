@@ -34,4 +34,11 @@ Updates your PowerShell profile to make common commands behave more like their B
 - `open` -> alias for `explorer.exe`
 - `Ctrl+K` -> clears the console (macOS behavior)
 
+### Adds Convenient Windows Shortcuts
+
+Adds shortcuts to make common Windows tasks simpler and easier to use:
+
+- `$HOSTS` -> path to the Windows hosts file ($env:SystemRoot\System32\drivers\etc\hosts)
+- `hosts` -> opens the hosts file in Notepad and automatically requests administrator privileges for editing
+
 The managed PowerShell profile configuration is automatically installed and updated by [`setup.ps1`](setup.ps1).

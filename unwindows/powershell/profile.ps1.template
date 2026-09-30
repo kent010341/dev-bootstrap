@@ -23,3 +23,10 @@ Set-Alias open explorer.exe -Force
 # fix CJK encoding
 chcp 65001 > $null
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Windows keeps the hosts file deep under System32 instead of /etc/hosts.
+# Provides a simple hosts command and automatically requests admin privileges for editing.
+$HOSTS = "$env:SystemRoot\System32\drivers\etc\hosts"
+function hosts {
+    Start-Process notepad -Verb RunAs -ArgumentList $HOSTS
+}
