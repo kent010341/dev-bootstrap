@@ -74,6 +74,8 @@ Options:
 
 Interactively select and switch to a local or remote Git branch. Fetch remote branches directly from the selector when needed.
 
+Type to filter branch names (case-insensitive, e.g. `dev` matches `origin/develop`). The first match is highlighted; use ↑/↓ to navigate and Enter to confirm checkout. Backspace edits the search; clear it to show all branches. Press Ctrl+R at any time in the branch selector to fetch and reload branches immediately. Fetch and Exit remain available while searching.
+
 ```text
 checkout
 ```

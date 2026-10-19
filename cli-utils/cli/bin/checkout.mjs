@@ -8,6 +8,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {
+  search,
   select,
   Separator,
 } from '@inquirer/prompts';
@@ -123,33 +124,80 @@ function branchLabel(branch) {
   return `  ${branch.name}`;
 }
 
-async function chooseBranch({ locals, remotes }) {
+async function chooseBranch(
+  { locals, remotes },
+  { input = process.stdin, output = process.stdout } = {},
+) {
+  const controller = new AbortController();
+  const onKeypress = (_text, key) => {
+    if (key?.ctrl && key.name === 'r') {
+      controller.abort('refresh');
+    }
+  };
+
+  input.on('keypress', onKeypress);
+
+  try {
+    return await search({
+      message: 'Branch (type to search, Ctrl+R to fetch)',
+      pageSize: 24,
+      source: term => branchChoices({ locals, remotes }, term),
+    }, {
+      input,
+      output,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    // Close the prompt before the main loop fetches and reloads branches.
+    if (error?.name === 'AbortPromptError' && controller.signal.aborted) {
+      return 'refresh';
+    }
+
+    throw error;
+  } finally {
+    input.removeListener('keypress', onKeypress);
+  }
+}
+
+function branchChoices({ locals, remotes }, term = '') {
+  const query = term.toLowerCase();
+  const matches = branch => branch.name.toLowerCase().includes(query);
+  const matchingLocals = locals.filter(matches);
+  const matchingRemotes = remotes.filter(matches);
   const choices = [];
 
-  if (locals.length > 0) {
+  if (matchingLocals.length > 0) {
     choices.push(
       new Separator('── Local ──'),
-      ...locals.map(branch => ({
+      ...matchingLocals.map(branch => ({
         name: branchLabel(branch),
         value: branch,
       })),
     );
   }
 
-  if (remotes.length > 0) {
+  if (matchingRemotes.length > 0) {
     choices.push(
       new Separator('── Remote ──'),
-      ...remotes.map(branch => ({
+      ...matchingRemotes.map(branch => ({
         name: branchLabel(branch),
         value: branch,
       })),
     );
+  }
+
+  if (query && matchingLocals.length + matchingRemotes.length === 0) {
+    choices.push({
+      name: 'No matching branches',
+      value: 'no-matches',
+      disabled: true,
+    });
   }
 
   choices.push(
     new Separator(),
     {
-      name: '↻ Fetch',
+      name: '↻ Fetch (Ctrl+R)',
       value: 'refresh',
     },
     {
@@ -158,11 +206,7 @@ async function chooseBranch({ locals, remotes }) {
     },
   );
 
-  return select({
-    message: 'Branch',
-    pageSize: 24,
-    choices,
-  });
+  return choices;
 }
 
 function localNameForRemote(remoteName) {
