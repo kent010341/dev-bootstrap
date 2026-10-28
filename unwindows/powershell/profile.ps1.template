@@ -30,3 +30,21 @@ $HOSTS = "$env:SystemRoot\System32\drivers\etc\hosts"
 function hosts {
     Start-Process notepad -Verb RunAs -ArgumentList $HOSTS
 }
+
+# Make `cd` (alias of Set-Location) behave like POSIX shells: a bare `cd` goes to
+# the home directory. By default, PowerShell on Windows treats a bare `cd` as a no-op.
+# All other usages are forwarded to the original cmdlet unchanged.
+function Set-Location {
+    if ($MyInvocation.ExpectingInput) {
+        # Pipeline input (e.g. Get-Item foo | cd): forward as-is.
+        $input | Microsoft.PowerShell.Management\Set-Location @args
+    }
+    elseif ($args.Count -eq 0) {
+        # Bare `cd`: go to the home directory, like bash/zsh.
+        Microsoft.PowerShell.Management\Set-Location -Path $HOME
+    }
+    else {
+        # Any arguments: defer to the original cmdlet.
+        Microsoft.PowerShell.Management\Set-Location @args
+    }
+}
