@@ -30,6 +30,7 @@ Updates your PowerShell profile to make common commands behave more like their B
 - `curl` -> native `curl.exe`
 - `where` -> native `where.exe`
 - `pwd` -> prints only the current directory path
+- `cd` -> a bare `cd` goes to the home directory (POSIX behavior); all other usages are unchanged
 - `which` -> alias for `where.exe`
 - `open` -> alias for `explorer.exe`
 - `Ctrl+K` -> clears the console (macOS behavior)
