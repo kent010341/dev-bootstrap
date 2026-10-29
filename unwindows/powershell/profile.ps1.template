@@ -31,10 +31,25 @@ function hosts {
     Start-Process notepad -Verb RunAs -ArgumentList $HOSTS
 }
 
-# Make `cd` (alias of Set-Location) behave like POSIX shells: a bare `cd` goes to
-# the home directory. By default, PowerShell on Windows treats a bare `cd` as a no-op.
+# Make `cd` (alias of Set-Location) behave like POSIX shells:
+#   - a bare `cd` goes to the home directory. By default, PowerShell on Windows
+#     treats a bare `cd` as a no-op.
+#   - `cd -` goes back to the previous directory ($OLDPWD) and prints it, so repeated
+#     `cd -` toggles between two directories. PowerShell 7 has a native `cd -`,
+#     but Windows PowerShell 5.x does not.
 # All other usages are forwarded to the original cmdlet unchanged.
+
+# Like POSIX shells, the previous directory lives in $env:OLDPWD (inherited by child
+# processes). Discard an inherited value that is not a valid directory here
+# (e.g. a POSIX-style path when launched from Git Bash).
+if ($env:OLDPWD -and -not (Test-Path -LiteralPath $env:OLDPWD -PathType Container)) {
+    Remove-Item Env:OLDPWD
+}
+
 function Set-Location {
+    # Remember where we were before the jump.
+    $before = (Get-Location).Path
+
     if ($MyInvocation.ExpectingInput) {
         # Pipeline input (e.g. Get-Item foo | cd): forward as-is.
         $input | Microsoft.PowerShell.Management\Set-Location @args
@@ -43,8 +58,23 @@ function Set-Location {
         # Bare `cd`: go to the home directory, like bash/zsh.
         Microsoft.PowerShell.Management\Set-Location -Path $HOME
     }
+    elseif ($args.Count -eq 1 -and $args[0] -eq '-') {
+        # `cd -`: go to $OLDPWD and print the new directory, like bash/zsh.
+        if (-not $env:OLDPWD) {
+            Write-Error 'cd: OLDPWD not set'
+            return
+        }
+        Microsoft.PowerShell.Management\Set-Location -LiteralPath $env:OLDPWD
+        if ($?) { (Get-Location).Path }
+    }
     else {
         # Any arguments: defer to the original cmdlet.
         Microsoft.PowerShell.Management\Set-Location @args
+    }
+
+    # Record the old path only if the location actually changed
+    # (a failed cd or a cd to the same directory must not overwrite it).
+    if ((Get-Location).Path -ne $before) {
+        $env:OLDPWD = $before
     }
 }
