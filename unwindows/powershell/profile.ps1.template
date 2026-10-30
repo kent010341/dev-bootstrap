@@ -21,7 +21,7 @@ Set-PSReadLineKeyHandler -Key "Ctrl+k" -Function ClearScreen
 Set-Alias open explorer.exe -Force
 
 # fix CJK encoding
-chcp 65001 > $null
+[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Windows keeps the hosts file deep under System32 instead of /etc/hosts.
